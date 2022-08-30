@@ -13,7 +13,7 @@ metadata:
 spec:
   definition:
     title: "Custom Action"
-    description: "Custom Action Demo Kamelet"
+    description: "Custom Action Demo  Kamelet"
     required:
       - name
       - value

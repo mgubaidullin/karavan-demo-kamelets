@@ -1,0 +1,70 @@
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: redmine-issue-update-sink
+  labels:
+    camel.apache.org/kamelet.type: "sink"
+  annotations:
+    camel.apache.org/kamelet.support.level: "Stable"
+    camel.apache.org/catalog.version: "1.0"
+    camel.apache.org/kamelet.icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' id='Layer_1' x='0px' y='0px' viewBox='0 0 512 512' style='enable-background:new 0 0 512 512;' xml:space='preserve'%3E%3Cg%3E%3Cg%3E%3Cpath d='M446.494,284.576c-0.677-5.405-1.565-10.744-2.68-16H280v230.509c35.056-4.371,67.17-18.2,93.726-38.843l46.323,46.322 l33.941-33.941l-46.315-46.314c20.643-26.555,34.456-58.678,38.829-93.734H512v-47.998H446.494z M344,364.576 c-17.645,0-32-14.355-32-32c0-17.645,14.355-32,32-32s32,14.355,32,32C376,350.221,361.645,364.576,344,364.576z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M68.186,268.576c-1.115,5.256-2.003,10.595-2.68,16H0v48h65.496c4.373,35.056,18.184,67.179,38.829,93.734L58.01,472.624 l33.941,33.941l46.323-46.322c26.557,20.642,58.67,34.47,93.726,38.843v-230.51H68.186z M168,364.576c-17.645,0-32-14.355-32-32 c0-17.645,14.355-32,32-32s32,14.355,32,32C200,350.221,185.645,364.576,168,364.576z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M453.99,144.528l-33.941-33.941l-46.323,46.323C341.214,131.634,300.37,116.576,256,116.576 s-85.214,15.059-117.725,40.333L91.95,110.586L58.01,144.526l46.338,46.336c-7.205,9.27-13.598,19.2-19.03,29.714h341.366 c-5.432-10.514-11.826-20.443-19.03-29.712L453.99,144.528z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M256,5.435c-43.106,0-78.23,34.096-79.918,76.787c25.002-8.827,51.894-13.646,79.918-13.646s54.917,4.819,79.918,13.646 C334.23,39.531,299.106,5.435,256,5.435z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"
+    camel.apache.org/provider: "Custom Provider"
+    camel.apache.org/kamelet.group: "Sink"
+spec:
+  definition:
+    title: "Redmine update issue"
+    description: "Redmine update issue Kamelet"
+    required:
+      - url
+      - apiKey
+      - issueId
+    properties:
+      url:
+        title: Redmine server URL
+        description: Redmine server URL
+        type: string
+      issueId:
+        title: Issue ID
+        description: ID of an issue to be updated
+        type: string
+      apiKey:
+        title: API access key
+        description: Redmine API access key
+        type: string
+        format: password
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:password
+        - urn:camel:group:credentials
+    type: object
+  types:
+    out:
+      mediaType: application/json
+  dependencies:
+    - "camel:core"
+    - "camel:jackson"
+    - "camel:vertx-http"
+    - "camel:kamelet"
+  template:
+    from:
+      uri: kamelet:source
+      steps:
+        - setHeader:
+            name: CamelHttpMethod
+            expression:
+              constant:
+                expression: PUT
+        - setHeader:
+            name: CamelHttpQuery
+            expression:
+              simple:
+                expression: '{{issueId}}.json'
+        - setHeader:
+            name: X-Redmine-API-Key
+            expression:
+              simple:
+                expression: '{{apiKey}}'
+        - to:
+            uri: "vertx-http:{{url}}/issues"
+            parameters:
+              okStatusCodeRange: 200-299,404
+            description: Call Redmine

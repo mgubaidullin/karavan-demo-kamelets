@@ -57,12 +57,12 @@ spec:
               constant:
                 expression: GET
         - setHeader:
-            name: CamelHttpUri
+            name: CamelHttpQuery
             expression:
               constant:
-                expression: 'https://api.github.com/repos/{{repoOwner}}/{{repoName}}/commits?sha=main&per_page=100'
+                expression: 'commits?sha=main&per_page=100'
         - to:
-            uri: "vertx-http:https://api.github.com"
+            uri: "vertx-http:https://api.github.com/repos/{{repoOwner}}/{{repoName}}/commits"
             parameters:
               bearerToken: "{{oauthToken}}"
             description: Call GitHub

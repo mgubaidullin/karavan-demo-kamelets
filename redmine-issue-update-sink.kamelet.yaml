@@ -54,17 +54,17 @@ spec:
               constant:
                 expression: PUT
         - setHeader:
-            name: CamelHttpQuery
+            name: Content-Type
             expression:
-              simple:
-                expression: '{{issueId}}.json'
+              constant:
+                expression: application/json
         - setHeader:
             name: X-Redmine-API-Key
             expression:
               simple:
                 expression: '{{apiKey}}'
-        - to:
-            uri: "vertx-http:{{url}}/issues"
+        - toD:
+            uri: "vertx-http:{{url}}/issues/{{issueId}}.json"
             parameters:
               okStatusCodeRange: 200-299,404
             description: Call Redmine

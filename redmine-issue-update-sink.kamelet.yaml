@@ -13,7 +13,7 @@ metadata:
 spec:
   definition:
     title: "Redmine update issue"
-    description: "Redmine update issue Kamelet"
+    description: "Redmine update issue Kamelet."
     required:
       - url
       - apiKey
